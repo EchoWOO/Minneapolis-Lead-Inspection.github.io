@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <!-- CSS Imports -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/themes/css/cartodb.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.2.3/leaflet.draw.css" />
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/style1.css" />
+  </head>
+  <body>
+    <!-- fullScreenModal -->
+    <div id="modal" class="map">
+      <img id = "logo" src="logo_MNlead.png">
+      <div id="intro">
+        <p>Predicting Household Lead Probabilities in Minneapolis</p>
+        <p>As part of our work for the MUSA Practicum class, we performed an analysis to help the City of Minneapolis to proactively identify which residences likely have hazardous lead paint and should be targeted for remediation efforts. To display our results publicly, this is an application we made to display the outcomes of our analysis on a map to display predicted probability of lead at the parcel level.
+Our aim was to create a web page from which residents or city officials could easily access additional information depending on their interests. Users curious about the process for developing the risk scores could access our full explanation of the modeling process through a hyperlink on the intro page. While those just wanting to understand their risk of household lead could jump right to the lead probability points. More interested users could fully explore a range of children’s elevated blood lead level data and census to see how they visually compare to instances of high lead risk. </p>
+      </div>
+      <button id="startMap">Start</button>
+      <div id="source">
+        <p>Data source:<a href="http://opendata.minneapolismn.gov/" class="sourceA"> Minneapolis Open Data </a>,
+          <a href="https://carto.com/" class="sourceA"> Carto</a>,
+          <a href="http://getbootstrap.com" class="sourceA"> Bootstrap</a>,
+          <a href="http://underscorejs.org/" class="sourceA"> Underscore.js</a>,
+          <a href="https://jquery.com/" class="sourceA"> jQuery.js</a></p>
+      </div>
+    </div>
+
+    <!-- topbar -->
+    <div class="topbar" id="top" style="vertical-align:middle">
+      <ul class="nav nav-pills">
+        <li role="presentation" id="info-sign"><a href="#">
+          <span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="font-size:20px"></span>
+          </a></li>
+        <li role="presentation" id="firstButton" style="margin-left:12px"><a href="#">
+          <span class="glyphicon glyphicon-globe" aria-hidden="true" style="font-size:20px"></span>
+        </a></li>
+        <li role="presentation" id="secondButton" style="margin-left:12px"><a href="#">
+          <span class="glyphicon glyphicon-signal" aria-hidden="true" style="font-size:20px"></span>
+        </a></li>
+        <!-- <li role="presentation"><a href="#" id="thirdButton" style="margin-left:12px">
+          <span class="glyphicon glyphicon-filter" aria-hidden="true" style="font-size:20px"></span>
+        </a></li> -->
+        <li role="presentation"><a href="#" id="fourthButton" style="margin-left:12px">
+          <span class="glyphicon glyphicon-home" aria-hidden="true" style="font-size:20px"></span>
+        </a></li>
+        <!-- <li role="presentation"><a href="#" id="fifthButton" style="margin-left:12px">
+          <span class="glyphicon glyphicon-search" aria-hidden="true" style="font-size:20px"></span>
+        </a></li> -->
+       </div>
+       <div class="topbar" id="Title" style="margin-left:380px">
+         <p>Predicting Household Lead Probabilities in Minneapolis</p>
+       </div>
+      </ul>
+    </div>
+
+    <!-- default Bar -->
+    <div class="originalBar" id="originalBar">
+      <h3>Lead exposure possibilities</h3>
+      <br><br>
+      <p>This map displays the probabilities of each parcel possibilities of having lead</p>
+      <p>Click around the census tracts to see the probabilities of lead exposure </p>
+      <p>You can also click on and off the buttons at the top bar to explore more about lead exposure.</p>
+      <p>See how we predicted probabilities for lead <a href="https://pennmusa.github.io/MUSA_801.io/project_4/index.html"> here</a></p>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="originalBar" id="firstsidebar" hidden="hidden">
+      <h3>Children's EBLL level</h3>
+      <br><br>
+      <p>This map displays the Elevated Blood Lead Level (EBLL) of children under five in Minneapolis</p>
+      <button class = "probbuttons" type="button" id="EBLL">
+      Show All EBLL Tracts
+      </button>
+      <button class = "probbuttons" type="button" id="EBLL1">
+      Highlight Low EBLL Tracts
+      </button>
+      <button class = "probbuttons" type="button" id="EBLL2">
+      Highlight Midrange EBLL Tracts
+      </button>
+      <button class = "probbuttons" type="button" id="EBLL3">
+      Highlight High EBLL Tracts
+      </button>
+      <button class = "probbuttons" type="button" id="EBLL4">
+      Turn Off Tracts
+      </button>
+    </div>
+    <div class="originalBar" id="secondsidebar" hidden="hidden">
+      <h3>Choropleth of Block Group Level Characteristics</h3>
+      <br><br>
+      <p>This map displays the related block group level characteristics in Minneapolis.</p>
+      <p>Click the buttons to explore different variables </p>
+      <button class = "probbuttons" type="button" id="load_3">
+      Median Household Income
+      </button>
+      <button class = "probbuttons" type="button" id="load_4">
+      Education Attainment
+      </button>
+      <button class = "probbuttons" type="button" id="load_5">
+      Families in Poverty
+      </button>
+      <button class = "probbuttons" type="button" id="load_6">
+      Number of Vacant Homes
+      </button>
+      <button class = "probbuttons" type="button" id="load_7">
+      Turn Off Block Groups
+      </button>
+    </div>
+    <!-- <div class="originalBar" id="thirdsidebar" hidden="hidden">
+      <h3>Filter the mapping characters</h3>
+      <br><br>
+      <p>Filter the characters you are interested in to find out the relationship between lead exposure and neighborhood Characters </p>
+    </div> -->
+    <div class="originalBar" id="fourthsidebar" hidden="hidden">
+      <h3>Predicted Lead Exposure probability at Parcel Level</h3>
+      <br><br>
+      <p>See the probablity of having lead at parcel level </p>
+      <button class = "probbuttons" type="button" id="AllProb">
+      Show all parcels with predictions
+      </button>
+      <button class = "probbuttons" type="button" id="HighProb">
+      High Probablity Parcels
+      </button>
+      <p class = "probtext" id = "HighProbtext" hidden>
+        See the probablity of having lead at parcel level
+      </p>
+      <button class = "probbuttons" type="button" id="MedianProb">
+      Median Probablity Parcels
+      </button>
+      <p class = "probtext" id = "MedianProbtext" hidden>
+        These blue parcels indicate medium probabilities of lead
+      </p>
+      <button class = "probbuttons" type="button" id="LowProb">
+      Low Probablity Parcels
+      </button>
+      <button class = "probbuttons" type="button" id="HidePoints">
+      Hide Parcels
+      </button>
+      <p class = "probtext" id = "LowProbtext" hidden>
+        These light blue parcels indicate low probabilities of lead
+      </p>
+      <br><br>
+    </div>
+    <!-- <div class="originalBar" id="fifthsidebar" hidden="hidden">
+      <h3>Search for Lead Exposure probability</h3>
+      <br><br>
+      <p>Type in one place and show me the lead exposure probablity</p>
+    </div> -->
+
+    <!-- Map -->
+    <div id="map" class="map">
+      <div class="legend">
+        <div id="gradient1" hidden="hidden"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- infowindow div -->
+    <script type="infowindow/html" id="iw_template_sublayer0">
+      <div class="cartodb-popup v2" id="sublayer0">
+        <a href="#close" class="cartodb-popup-close-button close">x</a>
+        <div class="cartodb-popup-content-wrapper">
+          <div class="cartodb-popup-content">
+            <p>Median Income: ${{medianh}}</p>
+            <p><strong>{{educati}} people above HS diploma</strong></p>
+            <p>{{poverty}} families below poverty line </p>
+            <p>{{vacancy}} vacant homes</p>
+        </div>
+        <div class="cartodb-popup-tip-container"></div>
+      </div>
+    </script>
+
+<script type="infowindow/html" id="iw_template_sublayer1">
+  <div class="cartodb-popup v2" id="sublayer1">
+    <a href="#close" class="cartodb-popup-close-button close">x</a>
+    <div class="cartodb-popup-content-wrapper">
+      <div class="cartodb-popup-content">
+        <p><strong>Median Income: ${{medianh}}</strong></p>
+        <p>{{educati}} people above HS diploma</p>
+        <p>{{poverty}} families below poverty line </p>
+        <p>{{vacancy}} vacant homes</p>
+    </div>
+    <div class="cartodb-popup-tip-container"></div>
+  </div>
+</script>
+
+<script type="infowindow/html" id="iw_template_sublayer2">
+  <div class="cartodb-popup v2" id="sublayer2">
+    <a href="#close" class="cartodb-popup-close-button close">x</a>
+    <div class="cartodb-popup-content-wrapper">
+      <div class="cartodb-popup-content">
+        <p>Median Income: ${{medianh}}</p>
+        <p>{{educati}} people above HS diploma</p>
+        <p><strong>{{poverty}} families below poverty line</strong></p>
+        <p>{{vacancy}} vacant homes</p>
+    </div>
+    <div class="cartodb-popup-tip-container"></div>
+  </div>
+</script>
+<script type="infowindow/html" id="iw_template_sublayer3">
+  <div class="cartodb-popup v2" id="sublayer3">
+    <a href="#close" class="cartodb-popup-close-button close">x</a>
+    <div class="cartodb-popup-content-wrapper">
+      <div class="cartodb-popup-content">
+        <p>Median Income: ${{medianh}}</p>
+        <p>{{educati}} people above HS diploma</p>
+        <p>{{poverty}} families below poverty line </p>
+        <p><strong>{{vacancy}} vacant homes</strong></p>
+    </div>
+    <div class="cartodb-popup-tip-container"></div>
+  </div>
+</script>
+<script type="infowindow/html" id="iw_template_tracts">
+  <div class="cartodb-popup v2" id="tracts">
+    <a href="#close" class="cartodb-popup-close-button close">x</a>
+    <div class="cartodb-popup-content-wrapper">
+      <div class="cartodb-popup-content">
+        <p>Lead Level Category: {{pctebllct}}</p>
+    </div>
+    <div class="cartodb-popup-tip-container"></div>
+  </div>
+</script>
+    <!-- Javascript Imports -->
+    <script src="import/chroma.js"></script>
+    <script src="import/underscore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.2.3/leaflet.draw.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/Functions1.js"></script>
+  </body>
+</html>
